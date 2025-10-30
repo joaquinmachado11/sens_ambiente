@@ -1,0 +1,2 @@
+source C:/Adscrip/firmware/projects/x_template/build/bootloader/gdbinit/symbols
+source C:/Adscrip/firmware/projects/x_template/build/bootloader/gdbinit/connect

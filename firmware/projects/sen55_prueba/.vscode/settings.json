@@ -1,0 +1,6 @@
+{
+    "idf.espIdfPathWin": "C:\\Users\\joama\\esp\\v5.4.2\\esp-idf",
+    "idf.toolsPathWin": "C:\\Users\\joama\\.espressif",
+    "idf.pythonInstallPath": "C:\\Users\\joama\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.portWin": "COM3"
+}

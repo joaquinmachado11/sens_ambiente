@@ -1,0 +1,2 @@
+source C:/Adscrip/firmware/projects/scd4x_prueba/build/bootloader/gdbinit/symbols
+source C:/Adscrip/firmware/projects/scd4x_prueba/build/bootloader/gdbinit/connect
