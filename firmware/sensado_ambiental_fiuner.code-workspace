@@ -11,6 +11,9 @@
         },
         {
             "path": "projects/scd4x_prueba"
+        },
+        {
+            "path": "projects/sens_amb"
         }
     ],
     "settings": {
