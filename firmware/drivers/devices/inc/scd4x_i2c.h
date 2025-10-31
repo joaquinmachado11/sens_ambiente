@@ -44,8 +44,6 @@ extern "C" {
 #endif
 
 #include "sensirion_config.h"
-#define SCD40_I2C_ADDR_62 0x62
-#define SCD41_I2C_ADDR_62 0x62
 
 typedef enum {
     SCD4X_START_PERIODIC_MEASUREMENT_CMD_ID = 0x21b1,
@@ -87,14 +85,6 @@ typedef enum {
     SCD4X_SENSOR_VARIANT_SCD42 = 0x2000,
     SCD4X_SENSOR_VARIANT_SCD43 = 0x5000,
 } scd4x_sensor_variant;
-
-/**
- * @brief Initialize i2c address of driver
- *
- * @param[in] i2c_address Used i2c address
- *
- */
-void scd4x_init(uint8_t i2c_address);
 
 /**
  * @brief scd4x_signal_co2_concentration

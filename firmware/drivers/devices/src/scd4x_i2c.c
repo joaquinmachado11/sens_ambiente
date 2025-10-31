@@ -47,11 +47,7 @@
 
 static uint8_t communication_buffer[9] = {0};
 
-static uint8_t _i2c_address;
-
-void scd4x_init(uint8_t i2c_address) {
-    _i2c_address = i2c_address;
-}
+#define _i2c_address 0x62
 
 uint16_t scd4x_signal_co2_concentration(uint16_t raw_co2_concentration) {
     uint16_t co2_concentration = 0;

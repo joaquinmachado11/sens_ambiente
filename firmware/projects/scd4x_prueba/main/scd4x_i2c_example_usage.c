@@ -55,7 +55,6 @@ void convert_and_print_serial(uint16_t* serial_raw) {
 int app_main(void) {
     int16_t error = NO_ERROR;
     sensirion_i2c_hal_init();
-    scd4x_init(SCD41_I2C_ADDR_62);
 
     uint16_t serial_number[3] = {0};
     sensirion_hal_sleep_us(30000);
