@@ -116,3 +116,7 @@
 4852	5224	7835361000010683	C:/Adscrip/firmware/projects/x_template/build/bootloader/.bin_timestamp	f40c74123d0e97af
 5224	5343	7835361000090657	esp-idf/esptool_py/CMakeFiles/bootloader_check_size	967bb9b4809d64e5
 5224	5343	7835361000090657	C:/Adscrip/firmware/projects/x_template/build/bootloader/esp-idf/esptool_py/CMakeFiles/bootloader_check_size	967bb9b4809d64e5
+393	1161	7836264399876252	esp-idf/esptool_py/CMakeFiles/bootloader_check_size	967bb9b4809d64e5
+393	1161	7836264399876252	C:/Adscrip/firmware/projects/x_template/build/bootloader/esp-idf/esptool_py/CMakeFiles/bootloader_check_size	967bb9b4809d64e5
+147	794	7836264808409758	esp-idf/esptool_py/CMakeFiles/bootloader_check_size	967bb9b4809d64e5
+147	794	7836264808409758	C:/Adscrip/firmware/projects/x_template/build/bootloader/esp-idf/esptool_py/CMakeFiles/bootloader_check_size	967bb9b4809d64e5
