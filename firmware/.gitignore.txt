@@ -4,3 +4,5 @@
 .espidf.peripherals.state.json
 # Settings per project
 **/.vscode/settings.json
+
+
