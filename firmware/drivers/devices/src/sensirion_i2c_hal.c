@@ -71,7 +71,7 @@ int16_t sensirion_i2c_hal_select_bus(uint8_t bus_idx) {
  * communication.
  */
 void sensirion_i2c_hal_init(void) {
-    I2C_initialize( 400000 ); //400kHz
+    I2C_initialize( 100000 ); //100kHz
 }
 
 /**
