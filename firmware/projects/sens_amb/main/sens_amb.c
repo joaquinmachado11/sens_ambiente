@@ -8,17 +8,22 @@
  *
  * @section hardConn Hardware Connection
  *
- * |    Peripheral  |   ESP32   	|
- * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * |     SEN55      | ESP32-C6-wroom-1 |
+ * |:--------------:|:-----------------|
+ * | 	1 (r)	 	|       5V   	   |
+ * | 	2 (b)	 	|       GND  	   |
+ * | 	3 (g)	 	|      GPIO_6      |
+ * | 	4 (y)	 	|      GPIO_7      |
+ * | 	5 (b)	 	|       GND	       |
+ * | 	6 (p)	 	|      - (NC)	   |
  * 
- * |    Peripheral  |   ESP32   	|
- * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * |    SCD41       | ESP32-C6-wroom-1 |
+ * |:--------------:|:-----------------|
+ * | 	1 (y)	 	|     GPIO_7	   |
+ * | 	2 (b)	 	|      GND  	   |
+ * | 	3 (r)	 	|      3V3	       |
+ * | 	4 (g)	 	|     GPIO_6	   |
  * 
- * |    Peripheral  |   ESP32   	|
- * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
  *
  *
  * @section changelog Changelog
@@ -41,22 +46,24 @@
 #include "sensirion_common.h"
 #include "sensirion_i2c_hal.h"
 /*==================[macros and definitions]=================================*/
+#define VERSION 1.0
 #define sensirion_hal_sleep_us sensirion_i2c_hal_sleep_usec
 /*==================[internal data definition]===============================*/
 int16_t error_sen5x = 0;
 int16_t error_scd4x = 0;
-uint16_t mass_concentration_pm1p0;
-uint16_t mass_concentration_pm2p5;
-uint16_t mass_concentration_pm4p0;
-uint16_t mass_concentration_pm10p0;
-int16_t ambient_humidity;
-int16_t ambient_temperature;
-int16_t voc_index;
-int16_t nox_index;
-uint16_t co2_concentration;
-int32_t temperature;
-int32_t relative_humidity;
-bool data_ready;
+uint16_t mass_concentration_pm1p0 = 0;
+uint16_t mass_concentration_pm2p5 = 0;
+uint16_t mass_concentration_pm4p0 = 0;
+uint16_t mass_concentration_pm10p0 = 0;
+int16_t ambient_humidity = 0;
+int16_t ambient_temperature = 0;
+int16_t voc_index = 0;
+int16_t nox_index = 0;
+uint16_t co2_concentration = 0;
+int32_t temperature = 0;
+int32_t relative_humidity = 0;
+bool data_ready_scd4x = false;
+bool data_ready_sen5x = false;
 /*==================[internal functions declaration]=========================*/
 void convert_and_print_serial(uint16_t* serial_raw) {
     uint64_t serial_as_int = 0;
@@ -64,45 +71,59 @@ void convert_and_print_serial(uint16_t* serial_raw) {
                                 LONG_INTEGER, 6);
     printf("0x%" PRIx64, serial_as_int);
 }
+uint16_t get_firmware_version(){
+    return VERSION;
+}
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	// Init
 	sensirion_i2c_hal_init(); // init I2C 400 kHz
 
-	// Start Measurement
+	// Manejo de excepciones SEN55
     error_sen5x = sen5x_start_measurement();
     if (error_sen5x) {
         printf("Error executing sen5x_start_measurement(): %i\n", error_sen5x);
     }
-
-	data_ready = false;
-	co2_concentration = 0;
-	temperature = 0;
-	relative_humidity = 0;
-
+    
     while(0) {
         // Read Measurement
-        sensirion_i2c_hal_sleep_usec(1000000);
+        sensirion_i2c_hal_sleep_usec(1000000); // 1 segundo
 
-		// Manejo de excepciones scd4x
-		error_scd4x = scd4x_get_data_ready_status(&data_ready);
+        // Manejo de excepciones scd4x
+        error_scd4x = scd4x_get_data_ready_status(&data_ready_scd4x);
         if (error_scd4x != NO_ERROR) {
-            printf("error executing get_data_ready_status(): %i\n", error_scd4x);
+            printf("Error SCD4x data is not ready: %i\n", error_scd4x); 
             continue;
         }
-        while (!data_ready) {
-            sensirion_hal_sleep_us(100000);
-            error_scd4x = scd4x_get_data_ready_status(&data_ready);
+        while (!data_ready_scd4x) {
+            sensirion_hal_sleep_us(100000); // 100 mseg
+            error_scd4x = scd4x_get_data_ready_status(&data_ready_scd4x);
             if (error_scd4x != NO_ERROR) {
-                printf("error executing get_data_ready_status(): %i\n", error_scd4x);
+                printf("Error SCD4x data is not ready: %i\n", error_scd4x);
                 continue;
             }
         }
+
+        error_sen5x = sen5x_read_data_ready(&data_ready_sen5x);
+        if (error_sen5x != NO_ERROR) {
+            printf("Error SEN5x data is not ready: %i\n", error_sen5x); 
+            continue;
+        }
+        while (!data_ready_sen5x){
+            sensirion_hal_sleep_us(100000);
+            error_sen5x = sen5x_read_data_ready(&data_ready_sen5x);
+            if (error_sen5x != NO_ERROR) {
+                printf("Error SEN5x data is not ready: %i\n", error_sen5x);
+                continue;
+            }
+        }
+
         error_scd4x = scd4x_read_measurement(&co2_concentration, &temperature,
                                        &relative_humidity);
         if (error_scd4x != NO_ERROR) {
-            printf("error executing scd4x read_measurement(): %i\n", error_scd4x);
+            printf("Error executing scd4x read_measurement(): %i\n", error_scd4x);
         } else {	// Muestra de datos scd4x
+            printf("SCD4x DATA: ");
 			printf("CO2 concentration [ppm]: %u\n", co2_concentration);
 			printf("Temperature scd4x [m°C] : %i\n", (int)temperature);
 			printf("Humidity scd4x [mRH]: %i\n", (int)relative_humidity);
@@ -116,6 +137,7 @@ void app_main(void){
         if (error_sen5x) {
             printf("Error executing sen5x_read_measured_values(): %i\n", error_sen5x);
         } else {
+            printf("SEN5x DATA: ");
             printf("Mass concentration pm1p0: %.1f µg/m³\n",
                    mass_concentration_pm1p0 / 10.0f);
             printf("Mass concentration pm2p5: %.1f µg/m³\n",
@@ -148,12 +170,17 @@ void app_main(void){
             }
         }
     }
-
-    error_sen5x = sen5x_stop_measurement();
-    if (error_sen5x) {
+    
+    /*
+    error_scd4x = scd4x_stop_periodic_measurement();
+    if (error_scd4x) {
         printf("Error executing sen5x_stop_measurement(): %i\n", error_scd4x);
     }
 
-    return 0;
+    error_sen5x = sen5x_stop_measurement();
+    if (error_sen5x) {
+        printf("Error executing sen5x_stop_measurement(): %i\n", error_sen5x);
+    }
+    */
 }
 /*==================[end of file]============================================*/
