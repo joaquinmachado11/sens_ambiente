@@ -67,7 +67,9 @@
             "soc_caps.h": "c",
             "mpu6050.h": "c",
             "i2c_mcu.h": "c",
-            "sensirion_i2c_hal.h": "c"
+            "sensirion_i2c_hal.h": "c",
+            "scd4x_i2c.h": "c",
+            "sensirion_common.h": "c"
         },
     },
     "tasks": {
