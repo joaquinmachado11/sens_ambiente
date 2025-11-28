@@ -41,11 +41,15 @@
 #include "sensirion_common.h"
 #include "sensirion_i2c_hal.h"
 
-/*
- * TO USE CONSOLE OUTPUT (PRINTF) YOU MAY NEED TO ADAPT THE INCLUDE ABOVE OR
- * DEFINE IT ACCORDING TO YOUR PLATFORM:
- * #define printf(...)
- */
+uint16_t mass_concentration_pm1p0;
+uint16_t mass_concentration_pm2p5;
+uint16_t mass_concentration_pm4p0;
+uint16_t mass_concentration_pm10p0;
+int16_t ambient_humidity;
+int16_t ambient_temperature;
+int16_t voc_index;
+int16_t nox_index;
+bool data_ready;
 
 void app_main(void) {
     int16_t error = 0;
@@ -135,53 +139,51 @@ void app_main(void) {
     while(true) {
         // Read Measurement
         sensirion_i2c_hal_sleep_usec(1000000);
+        
+        error = sen5x_read_data_ready(&data_ready);
 
-        uint16_t mass_concentration_pm1p0;
-        uint16_t mass_concentration_pm2p5;
-        uint16_t mass_concentration_pm4p0;
-        uint16_t mass_concentration_pm10p0;
-        int16_t ambient_humidity;
-        int16_t ambient_temperature;
-        int16_t voc_index;
-        int16_t nox_index;
-
-        error = sen5x_read_measured_values(
-            &mass_concentration_pm1p0, &mass_concentration_pm2p5,
-            &mass_concentration_pm4p0, &mass_concentration_pm10p0,
-            &ambient_humidity, &ambient_temperature, &voc_index, &nox_index);
-
-        if (error) {
-            printf("Error executing sen5x_read_measured_values(): %i\n", error);
+        if (error){
+            printf("Error executing sen5x_read_data_ready(): %i\n", error);
         } else {
-            printf("Mass concentration pm1p0: %.1f µg/m³\n",
-                   mass_concentration_pm1p0 / 10.0f);
-            printf("Mass concentration pm2p5: %.1f µg/m³\n",
-                   mass_concentration_pm2p5 / 10.0f);
-            printf("Mass concentration pm4p0: %.1f µg/m³\n",
-                   mass_concentration_pm4p0 / 10.0f);
-            printf("Mass concentration pm10p0: %.1f µg/m³\n",
-                   mass_concentration_pm10p0 / 10.0f);
-            if (ambient_humidity == 0x7fff) {
-                printf("Ambient humidity: n/a\n");
+            
+            error = sen5x_read_measured_values(
+                &mass_concentration_pm1p0, &mass_concentration_pm2p5,
+                &mass_concentration_pm4p0, &mass_concentration_pm10p0,
+                &ambient_humidity, &ambient_temperature, &voc_index, &nox_index);
+
+            if (error) {
+                printf("Error executing sen5x_read_measured_values(): %i\n", error);
             } else {
-                printf("Ambient humidity: %.1f %%RH\n",
-                       ambient_humidity / 100.0f);
-            }
-            if (ambient_temperature == 0x7fff) {
-                printf("Ambient temperature: n/a\n");
-            } else {
-                printf("Ambient temperature: %.1f °C\n",
-                       ambient_temperature / 200.0f);
-            }
-            if (voc_index == 0x7fff) {
-                printf("Voc index: n/a\n");
-            } else {
-                printf("Voc index: %.1f\n", voc_index / 10.0f);
-            }
-            if (nox_index == 0x7fff) {
-                printf("Nox index: n/a\n");
-            } else {
-                printf("Nox index: %.1f\n", nox_index / 10.0f);
+                printf("Mass concentration pm1p0: %.1f µg/m³\n",
+                    mass_concentration_pm1p0 / 10.0f);
+                printf("Mass concentration pm2p5: %.1f µg/m³\n",
+                    mass_concentration_pm2p5 / 10.0f);
+                printf("Mass concentration pm4p0: %.1f µg/m³\n",
+                    mass_concentration_pm4p0 / 10.0f);
+                printf("Mass concentration pm10p0: %.1f µg/m³\n",
+                    mass_concentration_pm10p0 / 10.0f);
+                if (ambient_humidity == 0x7fff) {
+                    printf("Ambient humidity: n/a\n");
+                } else {
+                    printf("Ambient humidity: %.1f %%RH\n",
+                        ambient_humidity / 100.0f);
+                }
+                if (ambient_temperature == 0x7fff) {
+                    printf("Ambient temperature: n/a\n");
+                } else {
+                    printf("Ambient temperature: %.1f °C\n",
+                        ambient_temperature / 200.0f);
+                }
+                if (voc_index == 0x7fff) {
+                    printf("Voc index: n/a\n");
+                } else {
+                    printf("Voc index: %.1f\n", voc_index / 10.0f);
+                }
+                if (nox_index == 0x7fff) {
+                    printf("Nox index: n/a\n");
+                } else {
+                    printf("Nox index: %.1f\n", nox_index / 10.0f);
+                }
             }
         }
     }
