@@ -52,7 +52,7 @@ void convert_and_print_serial(uint16_t* serial_raw) {
     printf("0x%" PRIx64, serial_as_int);
 }
 
-int app_main(void) {
+void app_main(void) {
     int16_t error = NO_ERROR;
     sensirion_i2c_hal_init();
 
@@ -78,7 +78,7 @@ int app_main(void) {
     error = scd4x_get_serial_number(serial_number, 3);
     if (error != NO_ERROR) {
         printf("error executing get_serial_number(): %i\n", error);
-        return error;
+        //return error;
     }
     printf("serial number: ");
     convert_and_print_serial(serial_number);
@@ -91,7 +91,7 @@ int app_main(void) {
     error = scd4x_start_periodic_measurement();
     if (error != NO_ERROR) {
         printf("error executing start_periodic_measurement(): %i\n", error);
-        return error;
+        //return error;
     }
     //
     // If low-power mode is required, switch to the low power
@@ -102,8 +102,9 @@ int app_main(void) {
     uint16_t co2_concentration = 0;
     int32_t temperature = 0;
     int32_t relative_humidity = 0;
-    uint16_t repetition = 0;
-    for (repetition = 0; repetition < 50; repetition++) {
+    //uint16_t repetition = 0;
+    //for (repetition = 0; repetition < 50; repetition++) {
+    while(true) {
         //
         // Slow down the sampling to 0.2Hz.
         //
@@ -137,6 +138,4 @@ int app_main(void) {
         printf("Temperature [m°C] : %i\n", (int)temperature);
         printf("Humidity [mRH]: %i\n", (int)relative_humidity);
     }
-
-    return NO_ERROR;
 }
