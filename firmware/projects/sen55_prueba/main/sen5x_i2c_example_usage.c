@@ -132,7 +132,7 @@ void app_main(void) {
         printf("Error executing sen5x_start_measurement(): %i\n", error);
     }
 
-    for (int i = 0; i < 60; i++) {
+    while(true) {
         // Read Measurement
         sensirion_i2c_hal_sleep_usec(1000000);
 
@@ -184,10 +184,5 @@ void app_main(void) {
                 printf("Nox index: %.1f\n", nox_index / 10.0f);
             }
         }
-    }
-
-    error = sen5x_stop_measurement();
-    if (error) {
-        printf("Error executing sen5x_stop_measurement(): %i\n", error);
     }
 }
