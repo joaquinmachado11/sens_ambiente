@@ -47,7 +47,7 @@
  * #define printf(...)
  */
 
-int app_main(void) {
+void app_main(void) {
     int16_t error = 0;
 
     sensirion_i2c_hal_init();
@@ -190,6 +190,4 @@ int app_main(void) {
     if (error) {
         printf("Error executing sen5x_stop_measurement(): %i\n", error);
     }
-
-    return 0;
 }
