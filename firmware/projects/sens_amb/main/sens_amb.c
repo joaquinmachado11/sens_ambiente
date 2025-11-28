@@ -77,7 +77,7 @@ uint16_t get_firmware_version(){
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	// Init
-	sensirion_i2c_hal_init(); // init I2C 400 kHz
+	sensirion_i2c_hal_init(); // init I2C 100 kHz
 
 	// Manejo de excepciones SEN55
     error_sen5x = sen5x_start_measurement();
@@ -85,23 +85,15 @@ void app_main(void){
         printf("Error executing sen5x_start_measurement(): %i\n", error_sen5x);
     }
     
-    while(0) {
+    while(true) {
         // Read Measurement
-        sensirion_i2c_hal_sleep_usec(1000000); // 1 segundo
+        sensirion_i2c_hal_sleep_usec(5000000); // 5 segundo
 
-        // Manejo de excepciones scd4x
+        // Verificacion de disponibilidad de datos
         error_scd4x = scd4x_get_data_ready_status(&data_ready_scd4x);
         if (error_scd4x != NO_ERROR) {
             printf("Error SCD4x data is not ready: %i\n", error_scd4x); 
             continue;
-        }
-        while (!data_ready_scd4x) {
-            sensirion_hal_sleep_us(100000); // 100 mseg
-            error_scd4x = scd4x_get_data_ready_status(&data_ready_scd4x);
-            if (error_scd4x != NO_ERROR) {
-                printf("Error SCD4x data is not ready: %i\n", error_scd4x);
-                continue;
-            }
         }
 
         error_sen5x = sen5x_read_data_ready(&data_ready_sen5x);
@@ -109,24 +101,16 @@ void app_main(void){
             printf("Error SEN5x data is not ready: %i\n", error_sen5x); 
             continue;
         }
-        while (!data_ready_sen5x){
-            sensirion_hal_sleep_us(100000);
-            error_sen5x = sen5x_read_data_ready(&data_ready_sen5x);
-            if (error_sen5x != NO_ERROR) {
-                printf("Error SEN5x data is not ready: %i\n", error_sen5x);
-                continue;
-            }
-        }
 
         error_scd4x = scd4x_read_measurement(&co2_concentration, &temperature,
                                        &relative_humidity);
         if (error_scd4x != NO_ERROR) {
             printf("Error executing scd4x read_measurement(): %i\n", error_scd4x);
         } else {	// Muestra de datos scd4x
-            printf("SCD4x DATA: ");
-			printf("CO2 concentration [ppm]: %u\n", co2_concentration);
-			printf("Temperature scd4x [m°C] : %i\n", (int)temperature);
-			printf("Humidity scd4x [mRH]: %i\n", (int)relative_humidity);
+            printf("SCD4x DATA: \n");
+			printf("CO2 concentration [ppm]: %u\n", co2_concentration); // en la version final solo quedara este
+			printf("Temperature scd4x [°C] : %i\n", (int)temperature/1000);
+			printf("Humidity scd4x [RH]: %i\n", (int)relative_humidity/1000);
 		}
         
         error_sen5x = sen5x_read_measured_values(
@@ -137,12 +121,12 @@ void app_main(void){
         if (error_sen5x) {
             printf("Error executing sen5x_read_measured_values(): %i\n", error_sen5x);
         } else {
-            printf("SEN5x DATA: ");
-            printf("Mass concentration pm1p0: %.1f µg/m³\n",
+            printf("SEN5x DATA: \n");
+            printf("Mass concentration pm1p0: %.1f µg/m³\n", // en la version final este no va
                    mass_concentration_pm1p0 / 10.0f);
             printf("Mass concentration pm2p5: %.1f µg/m³\n",
                    mass_concentration_pm2p5 / 10.0f);
-            printf("Mass concentration pm4p0: %.1f µg/m³\n",
+            printf("Mass concentration pm4p0: %.1f µg/m³\n", // en la version final este no va
                    mass_concentration_pm4p0 / 10.0f);
             printf("Mass concentration pm10p0: %.1f µg/m³\n",
                    mass_concentration_pm10p0 / 10.0f);
@@ -170,17 +154,5 @@ void app_main(void){
             }
         }
     }
-    
-    /*
-    error_scd4x = scd4x_stop_periodic_measurement();
-    if (error_scd4x) {
-        printf("Error executing sen5x_stop_measurement(): %i\n", error_scd4x);
-    }
-
-    error_sen5x = sen5x_stop_measurement();
-    if (error_sen5x) {
-        printf("Error executing sen5x_stop_measurement(): %i\n", error_sen5x);
-    }
-    */
 }
 /*==================[end of file]============================================*/
