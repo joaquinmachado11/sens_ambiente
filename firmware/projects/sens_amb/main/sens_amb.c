@@ -65,12 +65,6 @@ int32_t relative_humidity = 0;
 bool data_ready_scd4x = false;
 bool data_ready_sen5x = false;
 /*==================[internal functions declaration]=========================*/
-void convert_and_print_serial(uint16_t* serial_raw) {
-    uint64_t serial_as_int = 0;
-    sensirion_common_to_integer((uint8_t*)serial_raw, (uint8_t*)&serial_as_int,
-                                LONG_INTEGER, 6);
-    printf("0x%" PRIx64, serial_as_int);
-}
 uint16_t get_firmware_version(){
     return VERSION;
 }
@@ -79,12 +73,20 @@ void app_main(void){
 	// Init
 	sensirion_i2c_hal_init(); // init I2C 100 kHz
 
-	// Manejo de excepciones SEN55
-    error_sen5x = sen5x_start_measurement();
+    error_scd4x = scd4x_wake_up();
+    if (error_scd4x != NO_ERROR) {
+        printf("error executing wake_up(): %i\n", error_scd4x);
+    }
+    error_scd4x = scd4x_start_low_power_periodic_measurement(); // actualiza cada 30 seg
+    if (error_scd4x != NO_ERROR) {
+        printf("error executing start_low_power_periodic_measurement(): %i\n", error_scd4x);
+    }
+
+    error_sen5x = sen5x_start_measurement(); // actualiza cada 1 seg
     if (error_sen5x) {
         printf("Error executing sen5x_start_measurement(): %i\n", error_sen5x);
     }
-    
+
     while(true) {
         // Read Measurement
         sensirion_i2c_hal_sleep_usec(5000000); // 5 segundo
